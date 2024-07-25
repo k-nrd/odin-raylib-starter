@@ -1,0 +1,75 @@
+version: 3
+
+interval: 500ms
+
+vars:
+  ROOT_DIR:
+    sh: pwd
+  ODIN_ROOT:
+    sh: odin root
+
+tasks:
+  watch-lib:
+    deps: [build-dev]
+    watch: true
+    sources:
+      - "./lib/**/*.odin"
+    cmds:
+      - task: build-dev-lib
+
+  run-dev:
+    dir: ./build/dev
+    cmds:
+      - ./game.bin
+
+  cleanup:
+    cmds:
+      - rm -rf ./build
+
+  copy-vendor:
+    platforms: [linux]
+    dir: ./build/dev
+    cmds:
+      - mkdir linux
+      - cp -r {{.ODIN_ROOT}}vendor/raylib/linux/* ./linux/
+
+  build-dev:
+    platforms: [linux]
+    run: once
+    cmds:
+      - task: cleanup
+      - task: copy-vendor
+      - task: build-dev-lib
+      - task: build-dev-bin
+
+  build-dev-lib:
+    platforms: [linux]
+    dir: ./build/dev
+    cmds:
+      # First write to tmp file
+      - >
+        odin build ../../lib 
+        -use-separate-modules 
+        -define:RAYLIB_SHARED=true 
+        -extra-linker-flags:"-Wl,-rpath={{.PWD}}/build/dev/linux,-v"
+        -build-mode:dll 
+        -out:./game_tmp.so
+        -strict-style 
+        -vet 
+        -debug
+        -show-timings
+      # Make it the real thing, now that compilation is done
+      - mv game_tmp.so game.so
+
+  build-dev-bin:
+    platforms: [linux]
+    dir: ./build/dev
+    cmds:
+      - >
+        odin build ../../src 
+        -use-separate-modules 
+        -out:./game.bin
+        -strict-style 
+        -vet 
+        -debug
+        -show-timings
