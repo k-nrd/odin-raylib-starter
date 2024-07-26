@@ -91,10 +91,7 @@ draw :: proc() {
 @(export)
 init :: proc() {
 	state = new(State)
-	state^ = State {
-		player_position = {0, 0},
-	}
-	load(state)
+	state^ = State{}
 }
 
 @(export)
