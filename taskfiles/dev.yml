@@ -19,9 +19,12 @@ tasks:
   build:
     platforms: [linux]
     run: once
+    dir: ./build/dev
     cmds:
       - task: common:cleanup
+        vars: { TARGET: dev }
       - task: common:copy-vendor
+        vars: { TARGET: dev }
       - task: build-bin
       - task: build-lib
 
