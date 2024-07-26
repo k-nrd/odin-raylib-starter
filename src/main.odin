@@ -17,17 +17,17 @@ when ODIN_OS == .Windows {
 LIB_NAME :: "game" + DLL_EXT
 
 GameLib :: struct {
-	_lib:          dynlib.Library,
-	setup:         proc(),
-	init:          proc(),
-	load:          proc(state: rawptr),
-	clear:         proc(),
-	step:          proc() -> bool,
-	destroy:       proc(),
-	current_state: proc() -> rawptr,
-	state_size:    proc() -> int,
-	force_reload:  proc() -> bool,
-	force_reset:   proc() -> bool,
+	_lib:         dynlib.Library,
+	setup:        proc(),
+	reset:        proc(),
+	load:         proc(state: rawptr),
+	clear:        proc(),
+	step:         proc() -> bool,
+	destroy:      proc(),
+	memory:       proc() -> rawptr,
+	memory_size:  proc() -> int,
+	force_reload: proc() -> bool,
+	force_reset:  proc() -> bool,
 }
 
 api_version := 0
@@ -56,14 +56,14 @@ main :: proc() {
 		new_lib := load_lib() or_continue
 		log.debug("Reloaded")
 
-		log.debugf("State sizes: old=%v new=%v", lib.state_size(), new_lib.state_size())
-		if lib.state_size() != new_lib.state_size() || reset {
+		log.debugf("State sizes: old=%v new=%v", lib.memory_size(), new_lib.memory_size())
+		if lib.memory_size() != new_lib.memory_size() || reset {
 			log.debug("State size changed, live reloading")
 			lib.clear()
-			new_lib.init()
+			new_lib.reset()
 		} else {
 			log.debug("State size did not change, hot reloading")
-			new_lib.load(lib.current_state())
+			new_lib.load(lib.memory())
 		}
 		unload_lib(&lib)
 		lib = new_lib
