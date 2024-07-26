@@ -59,8 +59,6 @@ main :: proc() {
 	}
 }
 
-// make game use good GPU on laptops etc
-
 @(export)
 NvOptimusEnablement: u32 = 1
 
