@@ -1,0 +1,13 @@
+version: 3
+
+tasks:
+  cleanup:
+    cmds:
+      - rm -rf ./build
+
+  copy-vendor:
+    platforms: [linux]
+    dir: ./build/dev
+    cmds:
+      - mkdir linux
+      - cp -r $(odin root)vendor/raylib/linux/* ./linux/
