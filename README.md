@@ -9,30 +9,31 @@ bare-bones, code-wise.
 ### Development
 
 ```bash
+# Creates a `build/dev` folder for executable and libraries.
+# Copies vendor libraries to that folder as well.
+# Watches for changes in `lib/**/*.odin` files,
+# recompiles the game library on detection.
 task dev:lib -w 
-# This will create a new `build/dev` folder, where your executable and libraries
-# (including raylib) will live.
-# It will also watch for changes in `.odin` files in the `lib` folder, and 
-# recompile the game library on detection.
 ```
 
 Then, in another terminal:
 
 ```bash
+# Runs the development executable 
 task dev:run
-# This will run the development executable 
 ```
 
 Modify game library code and watch the changes show up once recompilation is done.
 
 ### Release
 
-```bash
-task release:build
-```
-
-To run:
+To build and run:
 
 ```bash
-task release:run
+task release:build && task release:run
 ```
+
+### To-do
+
+- [] Clean up old game libraries after we're done with `dev:lib -w`
+- [] Include some assets and watch for changes there as well
