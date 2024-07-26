@@ -9,10 +9,10 @@ bare-bones, code-wise.
 ### Development
 
 ```bash
-# Creates a `build/dev` folder for executable and libraries.
-# Copies vendor libraries to that folder as well.
-# Watches for changes in `lib/**/*.odin` files,
-# recompiles the game library on detection.
+# Creates a `build/dev` folder for executable and libraries,
+# and copies vendor libraries to that folder too.
+# With `-w`, it watches for changes in `lib/**/*.odin` files,
+# and recompiles the game library on detection.
 task dev:lib -w 
 ```
 
