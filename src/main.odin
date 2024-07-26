@@ -27,6 +27,7 @@ GameLib :: struct {
 	current_state: proc() -> rawptr,
 	state_size:    proc() -> int,
 	force_reload:  proc() -> bool,
+	force_reset:   proc() -> bool,
 }
 
 api_version := 0
@@ -34,59 +35,56 @@ api_version := 0
 main :: proc() {
 	context.logger = log.create_console_logger()
 
-	last_write, read_ok := read_last_lib_write()
-	if !read_ok do return
+	mod_time, mod_time_ok := read_lib_modification_time()
+	if !mod_time_ok do exit_with("Failed to read modification time")
 
 	lib, lib_ok := load_lib()
-	if !lib_ok {
-		log.errorf("Error loading library: %v", dynlib.last_error())
-		return
-	}
+	if !lib_ok do exit_with("Failed to load game library")
 
 	lib.setup()
 	defer lib.destroy()
 
-	current_version := last_write
-	log.debugf("Update time %v", current_version)
+	for current_mod_time := mod_time; lib.step(); {
+		mod_time = read_lib_modification_time() or_continue
 
-	for lib.step() {
-		last_write, read_ok = read_last_lib_write()
+		reset := lib.force_reset()
+		reload := lib.force_reload() || reset || mod_time != current_mod_time
+		if !reload do continue
 
-		if lib.force_reload() || (read_ok && (last_write != current_version)) {
-			log.debugf("Reloading lib: last=%v new=%v", current_version, last_write)
-			new_lib := load_lib() or_continue
-			log.debug("Reloaded")
+		log.debugf("Reloading lib: last=%v new=%v", current_mod_time, mod_time)
+		new_lib := load_lib() or_continue
+		log.debug("Reloaded")
 
-			log.debugf(
-				"State sizes: old=%v new=%v, live reloading",
-				lib.state_size(),
-				new_lib.state_size(),
-			)
-			if lib.state_size() != new_lib.state_size() {
-				log.debug("State size changed, live reloading")
-				lib.clear()
-				new_lib.init()
-			} else {
-				log.debug("State size did not change, hot reloading")
-				new_lib.load(lib.current_state())
-			}
-			unload_lib(&lib)
-			lib = new_lib
-			current_version = last_write
+		log.debugf("State sizes: old=%v new=%v", lib.state_size(), new_lib.state_size())
+		if lib.state_size() != new_lib.state_size() || reset {
+			log.debug("State size changed, live reloading")
+			lib.clear()
+			new_lib.init()
+		} else {
+			log.debug("State size did not change, hot reloading")
+			new_lib.load(lib.current_state())
 		}
+		unload_lib(&lib)
+		lib = new_lib
+		current_mod_time = mod_time
 	}
 
 	lib.destroy()
 	unload_lib(&lib)
 }
 
-read_last_lib_write :: proc() -> (os.File_Time, bool) {
-	last_write, err := os.last_write_time_by_name(LIB_NAME)
+exit_with :: proc(message: string, code := 1, location := #caller_location) {
+	log.error(message, location = location)
+	os.exit(code)
+}
+
+read_lib_modification_time :: proc() -> (os.File_Time, bool) {
+	mod_time, err := os.last_write_time_by_name(LIB_NAME)
 	if err != os.ERROR_NONE {
 		log.errorf("Failed getting last write time of {0}, error code: {1}", LIB_NAME, err)
-		return last_write, false
+		return mod_time, false
 	}
-	return last_write, true
+	return mod_time, true
 }
 
 copy_dll :: proc(to: string) -> bool {
@@ -115,10 +113,10 @@ load_lib :: proc() -> (lib: GameLib, ok: bool) {
 	_, ok = dynlib.initialize_symbols(&lib, game_dll_name, handle_field_name = "_lib")
 	if !ok {
 		log.errorf("Failed initializing symbols: {0}", dynlib.last_error())
+		return
 	}
 
 	api_version += 1
-	ok = true
 	return
 }
 

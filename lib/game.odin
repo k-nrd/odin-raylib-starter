@@ -45,10 +45,10 @@ simulate :: proc() {
 
 	input: Vec2f
 	if rl.IsKeyDown(.UP) || rl.IsKeyDown(.W) {
-		input.y -= 1
+		input.y += 1
 	}
 	if rl.IsKeyDown(.DOWN) || rl.IsKeyDown(.S) {
-		input.y += 1
+		input.y -= 1
 	}
 	if rl.IsKeyDown(.LEFT) || rl.IsKeyDown(.A) {
 		input.x += 1
@@ -119,4 +119,9 @@ destroy :: proc() {
 @(export)
 force_reload :: proc() -> bool {
 	return rl.IsKeyPressed(.F5)
+}
+
+@(export)
+force_reset :: proc() -> bool {
+	return rl.IsKeyPressed(.F6)
 }
