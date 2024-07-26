@@ -97,7 +97,7 @@ init :: proc() {
 @(export)
 load :: proc(mem: rawptr) {
 	state = (^State)(mem)
-	log.debugf("New state: %v", state^)
+	log.debugf("Loaded new state: %v", state^)
 }
 
 @(export)
