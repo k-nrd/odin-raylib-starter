@@ -35,5 +35,5 @@ task release:build && task release:run
 
 ### To-do
 
-- [] Clean up old game libraries after we're done with `dev:lib -w`
-- [] Include some assets and watch for changes there as well
+- [ ] Clean up old game libraries after we're done with `dev:lib -w`
+- [ ] Include some assets and watch for changes there as well
