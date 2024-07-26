@@ -30,7 +30,7 @@ setup :: proc() {
 	rl.InitWindow(1280, 720, "raylib hot-reload")
 	rl.SetTargetFPS(60)
 	rl.SetWindowMonitor(0)
-	reset()
+	init()
 }
 
 @(export)
@@ -65,7 +65,7 @@ draw :: proc() {
 	rl.BeginDrawing()
 	defer rl.EndDrawing()
 
-	rl.ClearBackground(rl.BLUE)
+	rl.ClearBackground(rl.BLACK)
 
 	rl.BeginMode2D(game_camera(state.player_position))
 	rl.DrawRectangleV(state.player_position, {10, 20}, rl.WHITE)
@@ -89,7 +89,7 @@ draw :: proc() {
 }
 
 @(export)
-reset :: proc() {
+init :: proc() {
 	state = new(State)
 	state^ = State {
 		player_position = {0, 0},
