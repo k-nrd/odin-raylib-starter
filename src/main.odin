@@ -43,6 +43,7 @@ main :: proc() {
 
 	lib.setup()
 	defer lib.destroy()
+	defer unload_lib(&lib)
 
 	for current_mod_time := mod_time; lib.step(); {
 		mod_time = read_lib_modification_time() or_continue
@@ -68,9 +69,6 @@ main :: proc() {
 		lib = new_lib
 		current_mod_time = mod_time
 	}
-
-	lib.destroy()
-	unload_lib(&lib)
 }
 
 exit_with :: proc(message: string, code := 1, location := #caller_location) {
