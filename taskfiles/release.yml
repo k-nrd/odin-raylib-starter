@@ -24,7 +24,7 @@ tasks:
     dir: ./build/release
     cmds:
       - >
-        odin build ../../bin/release 
+        odin build ../../main_release 
         -out:./game.bin
         -no-bounds-check
         -strict-style 

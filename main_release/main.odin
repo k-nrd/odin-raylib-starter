@@ -3,7 +3,7 @@ package main
 import "core:log"
 import "core:os"
 
-import game "../../lib"
+import game "../lib"
 
 UseTrackingAllocator :: #config(UseTrackingAllocator, false)
 

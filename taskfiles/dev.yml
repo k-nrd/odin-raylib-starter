@@ -52,7 +52,7 @@ tasks:
     dir: ./build/dev
     cmds:
       - >
-        odin build ../../src 
+        odin build ../../main_dev 
         -use-separate-modules 
         -out:./game.bin
         -strict-style 
