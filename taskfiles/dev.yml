@@ -1,0 +1,61 @@
+version: 3
+
+includes:
+  common: ./common.yml
+
+tasks:
+  run:
+    dir: ./build/dev
+    cmds:
+      - ./game.bin
+
+  lib:
+    deps: [build]
+    sources:
+      - "./lib/**/*.odin"
+    cmds:
+      - task: build-lib
+
+  build:
+    platforms: [linux]
+    run: once
+    dir: ./build/dev
+    cmds:
+      - task: common:cleanup
+        vars: { TARGET: dev }
+      - task: common:copy-vendor
+        vars: { TARGET: dev }
+      - task: build-bin
+      - task: build-lib
+
+  build-lib:
+    platforms: [linux]
+    dir: ./build/dev
+    cmds:
+      # First write to tmp file
+      - >
+        odin build ../../lib 
+        -use-separate-modules 
+        -define:RAYLIB_SHARED=true 
+        -extra-linker-flags:"-Wl,-rpath={{.PWD}}/build/dev/linux,-v"
+        -build-mode:dll 
+        -out:./game_tmp.so
+        -strict-style 
+        -vet 
+        -debug
+        -show-timings
+      # Make it the real thing, now that compilation is done
+      - mv game_tmp.so game.so
+
+  build-bin:
+    platforms: [linux]
+    dir: ./build/dev
+    cmds:
+      - >
+        odin build ../../main_dev 
+        -use-separate-modules 
+        -out:./game.bin
+        -strict-style 
+        -vet 
+        -debug
+        -show-timings

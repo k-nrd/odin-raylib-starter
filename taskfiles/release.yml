@@ -1,0 +1,32 @@
+version: 3
+
+includes:
+  common: ./common.yml
+
+tasks:
+  run:
+    dir: ./build/release
+    cmds:
+      - ./game.bin
+
+  build:
+    platforms: [linux]
+    dir: ./build/release
+    cmds:
+      - task: common:cleanup
+        vars: { TARGET: release }
+      - task: common:copy-vendor
+        vars: { TARGET: release }
+      - task: build-bin
+
+  build-bin:
+    platforms: [linux]
+    dir: ./build/release
+    cmds:
+      - >
+        odin build ../../main_release 
+        -out:./game.bin
+        -no-bounds-check
+        -strict-style 
+        -o:speed
+        -vet

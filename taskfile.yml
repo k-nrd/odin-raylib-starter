@@ -1,0 +1,7 @@
+version: 3
+
+interval: 100ms
+
+includes:
+  dev: ./taskfiles/dev.yml
+  release: ./taskfiles/release.yml
